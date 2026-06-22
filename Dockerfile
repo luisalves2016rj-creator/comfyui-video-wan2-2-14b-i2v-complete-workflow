@@ -7,7 +7,11 @@ ARG HF_TOKEN=""
 
 # install custom nodes into comfyui
 RUN comfy node install --exit-on-fail comfyui-frame-interpolation --mode remote
-# RUN # Could not resolve custom node: LoraLoaderFromJSON
+RUN comfy node install --exit-on-fail https://github.com/welltop-cn/ComfyUI-TeaCache.git --mode remote
+
+# Install SageAttention
+RUN pip install sageattention
+
 
 # download models into comfyui
 RUN BACKOFFS="10 20 30 60 90" && for i in 1 2 3 4 5; do HF_TOKEN=$HF_TOKEN comfy model download --url 'https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors' --relative-path models/vae --filename 'wan_2.1_vae.safetensors' && break; if [ $i -eq 5 ]; then echo "model-download failed after 5 attempts" >&2; exit 1; fi; SLEEP=$(echo $BACKOFFS | cut -d ' ' -f $i) && echo "model-download attempt $i failed; retrying in $SLEEP seconds" >&2; sleep $SLEEP; done
